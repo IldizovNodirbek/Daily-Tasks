@@ -7,7 +7,9 @@ import { setName, setEmail } from "../Redux/userSlice";
 import NotificationBox from "./NotificationBox";
 
 export default function FinishSignUp() {
-  const [message, setMessage] = useState("Emaildagi havolani tasdiqlash jarayonida...");
+  const [message, setMessage] = useState(
+    "Emaildagi havolani tasdiqlash jarayonida..."
+  );
   const [messageType, setMessageType] = useState("info");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -18,7 +20,9 @@ export default function FinishSignUp() {
         let email = window.localStorage.getItem("emailForSignIn");
         let name = window.localStorage.getItem("nameForSignIn") || "User";
         if (!email) {
-          email = window.prompt("Iltimos, emailingizni kiriting (emailingizni tekshiring):");
+          email = window.prompt(
+            "Iltimos, emailingizni kiriting (emailingizni tekshiring):"
+          );
           if (!email) {
             setMessage("Email kiritilmadi. Iltimos, qaytadan urinib ko‘ring.");
             setMessageType("error");
@@ -27,7 +31,11 @@ export default function FinishSignUp() {
           }
         }
         try {
-          const result = await signInWithEmailLink(auth, email, window.location.href);
+          const result = await signInWithEmailLink(
+            auth,
+            email,
+            window.location.href
+          );
           dispatch(setName(name));
           dispatch(setEmail(email));
           window.localStorage.removeItem("emailForSignIn");
@@ -41,7 +49,9 @@ export default function FinishSignUp() {
           setMessageType("error");
         }
       } else {
-        setMessage("Noto‘g‘ri tasdiqlash havolasi. Iltimos, qaytadan urinib ko‘ring.");
+        setMessage(
+          "Noto‘g‘ri tasdiqlash havolasi. Iltimos, qaytadan urinib ko‘ring."
+        );
         setMessageType("error");
         setTimeout(() => navigate("/signup"), 3000);
       }
@@ -52,9 +62,15 @@ export default function FinishSignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="border border-gray-300 p-6 sm:p-8 max-w-lg mx-auto bg-white rounded-md shadow-md">
-        <h2 className="text-xl sm:text-2xl font-semibold text-center">Tasdiqlash</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-center">
+          Tasdiqlash
+        </h2>
         <p className="text-sm text-gray-600 mt-2 text-center">{message}</p>
-        <NotificationBox message={message} type={messageType} onClose={() => setMessage("")} />
+        <NotificationBox
+          message={message}
+          type={messageType}
+          onClose={() => setMessage("")}
+        />
       </div>
     </div>
   );
