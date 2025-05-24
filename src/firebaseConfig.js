@@ -3,16 +3,30 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDSiCSFBIY94C1fL2_MEL_MbOpNySfY2vg",
-  authDomain: "daily-task-7703e.firebaseapp.com",
-  projectId: "daily-task-7703e",
-  storageBucket: "daily-task-7703e.firebasestorage.app",
-  messagingSenderId: "719940823556",
-  appId: "1:719940823556:web:515cf7712fe585230b6351",
-  measurementId: "G-CKK2TXE7XR",
+  apiKey: "AIzaSyDw_g_yHf93ke01whUtX9hAue6tfIOr-aI",
+  authDomain: "daily-task-2b818.firebaseapp.com",
+  projectId: "daily-task-2b818",
+  storageBucket: "daily-task-2b818.firebasestorage.app",
+  messagingSenderId: "788767915642",
+  appId: "1:788767915642:web:abff1e6551c538c37c85c3",
+  measurementId: "G-R749ZHPN01"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export { auth };
+
+
+// new connfig 
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDw_g_yHf93ke01whUtX9hAue6tfIOr-aI",
+//   authDomain: "daily-task-2b818.firebaseapp.com",
+//   projectId: "daily-task-2b818",
+//   storageBucket: "daily-task-2b818.firebasestorage.app",
+//   messagingSenderId: "788767915642",
+//   appId: "1:788767915642:web:abff1e6551c538c37c85c3",
+//   measurementId: "G-R749ZHPN01"
+// };
+
+
