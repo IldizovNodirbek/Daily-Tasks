@@ -18,7 +18,22 @@ export default function SignInEmail() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const validateEmail = (email) => {
+    return email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleSignIn = async () => {
+    if (!validateEmail(email)) {
+      setMessage("Iltimos, to‘g‘ri email manzil kiriting!");
+      setMessageType("error");
+      return;
+    }
+    if (password.trim() === "") {
+      setMessage("Iltimos, parol kiriting!");
+      setMessageType("error");
+      return;
+    }
+
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -33,16 +48,18 @@ export default function SignInEmail() {
       setTimeout(() => navigate("/todo/today"), 2000);
     } catch (error) {
       console.error("Sign-in error:", error.code, error.message);
-      if (
-        error.code === "auth/user-not-found" ||
-        error.code === "auth/wrong-password"
-      ) {
+      if (error.code === "auth/invalid-credential") {
         setMessage(
           "Noto‘g‘ri email yoki parol. Iltimos, qaytadan urinib ko‘ring."
         );
         setMessageType("error");
       } else if (error.code === "auth/invalid-email") {
         setMessage("Noto‘g‘ri email formati!");
+        setMessageType("error");
+      } else if (error.code === "auth/too-many-requests") {
+        setMessage(
+          "Juda ko‘p urinish. Iltimos, keyinroq qayta urinib ko‘ring."
+        );
         setMessageType("error");
       } else {
         setMessage("Kirishda xatolik: " + error.message);
@@ -52,6 +69,12 @@ export default function SignInEmail() {
   };
 
   const handlePasswordlessSignIn = async () => {
+    if (!validateEmail(email)) {
+      setMessage("Iltimos, to‘g‘ri email manzil kiriting!");
+      setMessageType("error");
+      return;
+    }
+
     try {
       const redirectUrl =
         import.meta.env.VITE_REDIRECT_URL ||
@@ -73,8 +96,16 @@ export default function SignInEmail() {
       setMessageType("success");
     } catch (error) {
       console.error("Passwordless sign-in error:", error.code, error.message);
-      if (error.code === "auth/invalid-email") {
+      if (error.code === "auth/missing-email") {
+        setMessage("Email kiritilmadi! Iltimos, email manzil kiriting.");
+        setMessageType("error");
+      } else if (error.code === "auth/invalid-email") {
         setMessage("Noto‘g‘ri email formati!");
+        setMessageType("error");
+      } else if (error.code === "auth/too-many-requests") {
+        setMessage(
+          "Juda ko‘p urinish. Iltimos, keyinroq qayta urinib ko‘ring."
+        );
         setMessageType("error");
       } else {
         setMessage("Xatolik: " + error.message);
