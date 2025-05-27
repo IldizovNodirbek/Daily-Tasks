@@ -1,77 +1,82 @@
-import React, { useEffect, useState } from "react";
-import { auth } from "../firebaseConfig";
-import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebaseConfig";
+import { signInWithEmailLink, isSignInWithEmailLink } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { setName, setEmail } from "../Redux/userSlice";
 import NotificationBox from "./NotificationBox";
 
 export default function FinishSignUp() {
-  const [message, setMessage] = useState(
-    "Emaildagi havolani tasdiqlash jarayonida..."
-  );
-  const [messageType, setMessageType] = useState("info");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [message, setMessage] = useState("Havola tasdiqlanmoqda...");
+  const [messageType, setMessageType] = useState("info");
 
   useEffect(() => {
-    const handleEmailLinkSignIn = async () => {
-      if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem("emailForSignIn");
-        let name = window.localStorage.getItem("nameForSignIn") || "User";
-        if (!email) {
-          email = window.prompt(
-            "Iltimos, emailingizni kiriting (emailingizni tekshiring):"
-          );
-          if (!email) {
-            setMessage("Email kiritilmadi. Iltimos, qaytadan urinib ko‘ring.");
-            setMessageType("error");
-            setTimeout(() => navigate("/signup"), 3000);
-            return;
-          }
-        }
-        try {
-          const result = await signInWithEmailLink(
-            auth,
-            email,
-            window.location.href
-          );
-          dispatch(setName(name));
-          dispatch(setEmail(email));
-          window.localStorage.removeItem("emailForSignIn");
-          window.localStorage.removeItem("nameForSignIn");
-          setMessage("Muvaffaqiyatli tasdiqlandi!");
-          setMessageType("success");
-          setTimeout(() => navigate("/todo/today"), 2000);
-        } catch (error) {
-          console.error("Sign-in error:", error.code, error.message);
-          setMessage("Xatolik: " + error.message);
-          setMessageType("error");
-        }
-      } else {
-        setMessage(
-          "Noto‘g‘ri tasdiqlash havolasi. Iltimos, qaytadan urinib ko‘ring."
-        );
+    const handleSignInWithLink = async () => {
+      // Tekshirish: URL tasdiqlash havolasi ekanligini aniqlash
+      if (!isSignInWithEmailLink(auth, window.location.href)) {
+        setMessage("Noto‘g‘ri tasdiqlash havolasi!");
+        setMessageType("error");
+        setTimeout(() => navigate("/signin"), 3000);
+        return;
+      }
+
+      // localStorage dan email va name olish
+      const email = window.localStorage.getItem("emailForSignIn");
+      const name = window.localStorage.getItem("nameForSignIn");
+
+      if (!email) {
+        setMessage("Email topilmadi! Iltimos, qaytadan ro‘yxatdan o‘ting.");
         setMessageType("error");
         setTimeout(() => navigate("/signup"), 3000);
+        return;
+      }
+
+      try {
+        console.log("FinishSignUp: Attempting to sign in with email link", {
+          email,
+          name,
+        });
+        const result = await signInWithEmailLink(
+          auth,
+          email,
+          window.location.href
+        );
+        const user = result.user;
+
+        // Redux ga ma'lumotlarni yozish
+        dispatch(setName(name || email.split("@")[0] || "User"));
+        dispatch(setEmail(user.email));
+
+        // localStorage ni tozalash
+        window.localStorage.removeItem("emailForSignIn");
+        window.localStorage.removeItem("nameForSignIn");
+
+        setMessage("Havola muvaffaqiyatli tasdiqlandi! Tizimga kiryapsiz...");
+        setMessageType("success");
+        console.log(
+          "FinishSignUp: Sign-in successful, navigating to /todo/today"
+        );
+        setTimeout(() => navigate("/todo/today"), 2000);
+      } catch (error) {
+        console.error("FinishSignUp error:", error.code, error.message);
+        setMessage(`Xatolik yuz berdi: ${error.message}`);
+        setMessageType("error");
+        setTimeout(() => navigate("/signin"), 3000);
       }
     };
-    handleEmailLinkSignIn();
+
+    handleSignInWithLink();
   }, [navigate, dispatch]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="border border-gray-300 p-6 sm:p-8 max-w-lg mx-auto bg-white rounded-md shadow-md">
-        <h2 className="text-xl sm:text-2xl font-semibold text-center">
-          Tasdiqlash
-        </h2>
-        <p className="text-sm text-gray-600 mt-2 text-center">{message}</p>
-        <NotificationBox
-          message={message}
-          type={messageType}
-          onClose={() => setMessage("")}
-        />
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <NotificationBox
+        message={message}
+        type={messageType}
+        onClose={() => {}}
+      />
     </div>
   );
 }
