@@ -20,8 +20,13 @@ export default function SignUpEmail() {
   const dispatch = useDispatch();
 
   const handleSignUp = async () => {
+    if (!name.trim()) {
+      setMessage("Iltimos, ismingizni kiriting!");
+      setMessageType("error");
+      return;
+    }
+
     try {
-      // Foydalanuvchini ro‘yxatdan o‘tkazish
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -29,11 +34,9 @@ export default function SignUpEmail() {
       );
       const user = userCredential.user;
 
-      // Redux’ga ma'lumotlarni saqlash
-      dispatch(setName(name || email.split("@")[0] || "User"));
+      dispatch(setName(name));
       dispatch(setEmail(user.email));
 
-      // Email tasdiqlash havolasini yuborish
       const redirectUrl =
         import.meta.env.VITE_REDIRECT_URL ||
         "http://localhost:5173/finish-sign-up";
@@ -48,10 +51,7 @@ export default function SignUpEmail() {
       );
       setMessageType("success");
       window.localStorage.setItem("emailForSignIn", email);
-      window.localStorage.setItem(
-        "nameForSignIn",
-        name || email.split("@")[0] || "User"
-      );
+      window.localStorage.setItem("nameForSignIn", name); 
     } catch (error) {
       console.error("Sign-up error:", error.code, error.message);
       if (error.code === "auth/email-already-in-use") {
