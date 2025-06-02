@@ -7,32 +7,12 @@ import WeeklyTasks from "../DailyTasks/WeeklyTasks";
 import MonthlyTasks from "../DailyTasks/MonthlyTasks";
 import AddSpecialDay from "../DailyTasks/AddSpecialDay";
 import { useSelector } from "react-redux";
-import OneDay from "../DailyTasks/OneDay";
-import OneDayMonth from "../DailyTasks/OneDayMonth";
-import OneDaySpecial from "../DailyTasks/OneDaySpecial";
 
 function TodoPage() {
-  const [specialDays, setSpeicalDays] = useState([]);
+  const [isSpecialDayModalOpen, setSpecialDayModalOpen] = useState(false);
   const location = useLocation();
   const name = useSelector((state) => state.user.name);
   const email = useSelector((state) => state.user.email);
-
-  const [isSpecialDayModalOpen, setSpecialDayModalOpen] = useState(false);
-
-  useEffect(() => {
-    const data = localStorage.getItem("special");
-    try {
-      if (data) {
-        const parsedData = JSON.parse(data);
-        setSpeicalDays(parsedData);
-      } else {
-        setSpeicalDays([]);
-      }
-    } catch (error) {
-      console.error('Failed to parse localStorage data for "special":', error);
-      setSpeicalDays([]);
-    }
-  }, []);
 
   const openSpecialDayModal = () => setSpecialDayModalOpen(true);
   const closeSpecialDayModal = () => setSpecialDayModalOpen(false);
@@ -128,9 +108,6 @@ function TodoPage() {
               <Route path="today" element={<TodayTasks />} />
               <Route path="weekly" element={<WeeklyTasks />} />
               <Route path="monthly" element={<MonthlyTasks />} />
-              <Route path="weekly/:day" element={<OneDay />} />
-              <Route path="/:day" element={<OneDaySpecial />} />
-              <Route path="/monthly/:day" element={<OneDayMonth />} />
             </Routes>
           </div>
         </div>
@@ -139,10 +116,7 @@ function TodoPage() {
       {isSpecialDayModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 px-4">
           <div className="relative z-50 w-full max-w-sm sm:max-w-md">
-            <AddSpecialDay
-              onClose={closeSpecialDayModal}
-              onAddTask={(task) => console.log("Special day task added:", task)}
-            />
+            <AddSpecialDay onClose={closeSpecialDayModal} />
           </div>
         </div>
       )}

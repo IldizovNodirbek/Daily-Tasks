@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { changeSpecialTaskStatus } from "./specialTasksSlice";
 
 const taskSlice = createSlice({
   name: "tasks",
@@ -10,8 +11,10 @@ const taskSlice = createSlice({
   reducers: {
     addTask: (state, action) => {
       const { section, task } = action.payload;
-      if (section && state[section]) {
+      if (section && state[section] && task.date) {
         state[section].push(task);
+      } else {
+        console.error(`Invalid section: ${section} or missing date`);
       }
     },
     changeStatus: (state, action) => {
@@ -21,6 +24,10 @@ const taskSlice = createSlice({
         const task = taskList.find((task) => task.id === id);
         if (task) {
           task.status = status;
+          if (task.isSpecial) {
+            // Dispatch to specialTasksSlice
+            dispatch(changeSpecialTaskStatus({ id, status }));
+          }
         }
       }
     },
@@ -37,9 +44,10 @@ const taskSlice = createSlice({
       if (taskList) {
         const taskIndex = taskList.findIndex((task) => task.id === id);
         if (taskIndex !== -1) {
-          taskList[taskIndex] = {
-            ...taskList[taskIndex],
+          state[section][taskIndex] = {
+            ...state[section][taskIndex],
             ...updatedTask,
+            isSpecial: state[section][taskIndex].isSpecial,
           };
         }
       }

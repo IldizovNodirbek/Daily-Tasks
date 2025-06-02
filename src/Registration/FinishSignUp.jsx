@@ -36,17 +36,32 @@ export default function FinishSignUp() {
             email,
             window.location.href
           );
+          const user = result.user;
+          if (!user.emailVerified) {
+            setMessage(
+              "Email tasdiqlanmagan. Iltimos, tasdiqlash havolasini tekshiring."
+            );
+            setMessageType("error");
+            return;
+          }
           dispatch(setName(name));
           dispatch(setEmail(email));
           window.localStorage.removeItem("emailForSignIn");
           window.localStorage.removeItem("nameForSignIn");
-          setMessage("Muvaffaqiyatli tasdiqlandi!");
+          setMessage("Muvaffaqiyatli ro‘yxatdan o‘tdingiz!");
           setMessageType("success");
           setTimeout(() => navigate("/todo/today"), 2000);
         } catch (error) {
           console.error("Sign-in error:", error.code, error.message);
-          setMessage("Xatolik: " + error.message);
+          if (error.code === "auth/invalid-email") {
+            setMessage("Noto‘g‘ri email formati!");
+          } else if (error.code === "auth/invalid-action-code") {
+            setMessage("Noto‘g‘ri yoki eskirgan tasdiqlash havolasi.");
+          } else {
+            setMessage("Xatolik: " + error.message);
+          }
           setMessageType("error");
+          setTimeout(() => navigate("/signup"), 3000);
         }
       } else {
         setMessage(
@@ -61,7 +76,7 @@ export default function FinishSignUp() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="border border-gray-300 p-6 sm:p-8 max-w-lg mx-auto bg-white rounded-md shadow-md">
+      <div className="bg-white border border-gray-300 p-6 sm:p-8 max-w-lg mx-auto rounded-md shadow-md">
         <h2 className="text-xl sm:text-2xl font-semibold text-center">
           Tasdiqlash
         </h2>

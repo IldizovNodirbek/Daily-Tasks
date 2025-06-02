@@ -41,6 +41,20 @@ export default function SignInEmail() {
         password
       );
       const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        setMessage("Email tasdiqlanmagan! Iltimos, emailingizni tekshiring.");
+        setMessageType("error");
+        await sendSignInLinkToEmail(auth, email, {
+          url:
+            import.meta.env.VITE_REDIRECT_URL ||
+            "http://localhost:5173/finish-sign-in",
+          handleCodeInApp: true,
+        });
+        window.localStorage.setItem("emailForSignIn", email);
+        return;
+      }
+
       dispatch(setName(user.displayName || email.split("@")[0] || "User"));
       dispatch(setEmail(user.email));
       setMessage("Muvaffaqiyatli kirdingiz!");
@@ -78,7 +92,7 @@ export default function SignInEmail() {
     try {
       const redirectUrl =
         import.meta.env.VITE_REDIRECT_URL ||
-        "http://localhost:5173/finish-sign-up";
+        "http://localhost:5173/finish-sign-in";
       console.log("ActionCodeSettings URL:", redirectUrl);
       const actionCodeSettings = {
         url: redirectUrl,

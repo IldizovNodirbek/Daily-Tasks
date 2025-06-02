@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global font-family */
+* {
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 /* Neon pulsing animation for Add Special Day button */
 .neon-pulse {
   border: 3px solid transparent;
@@ -21,4 +29,19 @@
     border-color: #1e3a8a; /* To'q ko'k */
     box-shadow: 0 0 5px #1e3a8a, 0 0 10px #1e3a8a, 0 0 15px #1e3a8a;
   }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #5200ff;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #7b00ff;
 }

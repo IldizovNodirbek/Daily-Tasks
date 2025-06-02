@@ -34,11 +34,11 @@ export default function SignUpEmail() {
       );
       const user = userCredential.user;
 
-      dispatch(setName(name));
-      dispatch(setEmail(user.email));
+      dispatch(setName(name)); //
+      dispatch(setEmail(user.email)); //
 
       const redirectUrl =
-        import.meta.env.VITE_REDIRECT_URL ||
+        import.meta.env.VITE_SIGNUP_REDIRECT_URL ||
         "http://localhost:5173/finish-sign-up";
       console.log("ActionCodeSettings URL:", redirectUrl);
       const actionCodeSettings = {
@@ -51,7 +51,7 @@ export default function SignUpEmail() {
       );
       setMessageType("success");
       window.localStorage.setItem("emailForSignIn", email);
-      window.localStorage.setItem("nameForSignIn", name); 
+      window.localStorage.setItem("nameForSignIn", name);
     } catch (error) {
       console.error("Sign-up error:", error.code, error.message);
       if (error.code === "auth/email-already-in-use") {
