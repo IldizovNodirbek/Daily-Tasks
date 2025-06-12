@@ -8,7 +8,7 @@ import NotificationBox from "./NotificationBox";
 
 export default function FinishSignUp() {
   const [message, setMessage] = useState(
-    "Emaildagi havolani tasdiqlash jarayonida..."
+    "In the process of verifying the link in the email..."
   );
   const [messageType, setMessageType] = useState("info");
   const navigate = useNavigate();
@@ -21,10 +21,10 @@ export default function FinishSignUp() {
         let name = window.localStorage.getItem("nameForSignIn") || "User";
         if (!email) {
           email = window.prompt(
-            "Iltimos, emailingizni kiriting (emailingizni tekshiring):"
+            "Please enter your email (check your email):"
           );
           if (!email) {
-            setMessage("Email kiritilmadi. Iltimos, qaytadan urinib ko‘ring.");
+            setMessage("Email not entered. Please try again.");
             setMessageType("error");
             setTimeout(() => navigate("/signup"), 3000);
             return;
@@ -37,35 +37,21 @@ export default function FinishSignUp() {
             window.location.href
           );
           const user = result.user;
-          if (!user.emailVerified) {
-            setMessage(
-              "Email tasdiqlanmagan. Iltimos, tasdiqlash havolasini tekshiring."
-            );
-            setMessageType("error");
-            return;
-          }
           dispatch(setName(name));
           dispatch(setEmail(email));
           window.localStorage.removeItem("emailForSignIn");
           window.localStorage.removeItem("nameForSignIn");
-          setMessage("Muvaffaqiyatli ro‘yxatdan o‘tdingiz!");
+          setMessage("You are successfully logged in! Forwarding...");
           setMessageType("success");
           setTimeout(() => navigate("/todo/today"), 2000);
         } catch (error) {
-          console.error("Sign-in error:", error.code, error.message);
-          if (error.code === "auth/invalid-email") {
-            setMessage("Noto‘g‘ri email formati!");
-          } else if (error.code === "auth/invalid-action-code") {
-            setMessage("Noto‘g‘ri yoki eskirgan tasdiqlash havolasi.");
-          } else {
-            setMessage("Xatolik: " + error.message);
-          }
+          setMessage("Error: " + error.message);
           setMessageType("error");
           setTimeout(() => navigate("/signup"), 3000);
         }
       } else {
         setMessage(
-          "Noto‘g‘ri tasdiqlash havolasi. Iltimos, qaytadan urinib ko‘ring."
+          "Invalid verification link. Please try again."
         );
         setMessageType("error");
         setTimeout(() => navigate("/signup"), 3000);
@@ -78,7 +64,7 @@ export default function FinishSignUp() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white border border-gray-300 p-6 sm:p-8 max-w-lg mx-auto rounded-md shadow-md">
         <h2 className="text-xl sm:text-2xl font-semibold text-center">
-          Tasdiqlash
+          Confirmation
         </h2>
         <p className="text-sm text-gray-600 mt-2 text-center">{message}</p>
         <NotificationBox

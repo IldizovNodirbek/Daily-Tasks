@@ -1,73 +1,60 @@
 import React, { useState } from "react";
 import { auth } from "../firebaseConfig";
-import {
-  createUserWithEmailAndPassword,
-  sendSignInLinkToEmail,
-} from "firebase/auth";
+import { sendSignInLinkToEmail, fetchSignInMethodsForEmail } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setName, setEmail } from "../Redux/userSlice";
 import NotificationBox from "./NotificationBox";
 import target from "../assets/target.png";
 
 export default function SignUpEmail() {
   const [email, setEmailInput] = useState("");
-  const [password, setPassword] = useState("");
   const [name, setNameInput] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleSignUp = async () => {
     if (!name.trim()) {
-      setMessage("Iltimos, ismingizni kiriting!");
+      setMessage("Please enter your name or nickname!");
       setMessageType("error");
       return;
     }
-
+    if (!email.trim()) {
+      setMessage("Please, Enter your email!");
+      setMessageType("error");
+      return;
+    }
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      dispatch(setName(name)); //
-      dispatch(setEmail(user.email)); //
-
+      // Check if email is already registered
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods && methods.length > 0) {
+        setMessage("This email is already registered. Please sign in from /signin.");
+        setMessageType("error");
+        setTimeout(() => navigate("/signin"), 3000);
+        return;
+      }
       const redirectUrl =
         import.meta.env.VITE_SIGNUP_REDIRECT_URL ||
         "http://localhost:5173/finish-sign-up";
-      console.log("ActionCodeSettings URL:", redirectUrl);
       const actionCodeSettings = {
         url: redirectUrl,
         handleCodeInApp: true,
       };
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       setMessage(
-        "Tasdiqlash havolasi emailingizga yuborildi! Iltimos, emailingizni (shu jumladan Spam jildini) tekshiring."
+        "A confirmation link has been sent to your email! Please check your email (including your Spam folder)."
       );
       setMessageType("success");
       window.localStorage.setItem("emailForSignIn", email);
       window.localStorage.setItem("nameForSignIn", name);
     } catch (error) {
-      console.error("Sign-up error:", error.code, error.message);
       if (error.code === "auth/email-already-in-use") {
         setMessage(
-          "Bu email allaqachon ro‘yxatdan o‘tgan. Iltimos, /signin sahifasidan tizimga kiring."
+          "This email is already registered. Please sign in from /signin."
         );
         setMessageType("error");
         setTimeout(() => navigate("/signin"), 3000);
-      } else if (error.code === "auth/invalid-email") {
-        setMessage("Noto‘g‘ri email formati!");
-        setMessageType("error");
-      } else if (error.code === "auth/weak-password") {
-        setMessage("Parol kamida 6 belgi bo‘lishi kerak!");
-        setMessageType("error");
       } else {
-        setMessage("Xatolik: " + error.message);
+        setMessage("Error: " + error.message);
         setMessageType("error");
       }
     }
@@ -110,7 +97,7 @@ export default function SignUpEmail() {
               type="text"
               value={name}
               onChange={(e) => setNameInput(e.target.value)}
-              placeholder="Ismingizni kiriting (masalan, John201)"
+              placeholder="Enter your name or nickname"
               className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -124,24 +111,7 @@ export default function SignUpEmail() {
               type="email"
               value={email}
               onChange={(e) => setEmailInput(e.target.value)}
-              placeholder="Email kiriting (masalan, john@gmail.com)"
-              className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="block text-sm font-medium mb-2"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Parol kiriting"
+              placeholder="Enter your email"
               className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

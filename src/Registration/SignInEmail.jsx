@@ -1,130 +1,36 @@
 import React, { useState } from "react";
 import { auth } from "../firebaseConfig";
-import {
-  signInWithEmailAndPassword,
-  sendSignInLinkToEmail,
-} from "firebase/auth";
+import { fetchSignInMethodsForEmail } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setName, setEmail } from "../Redux/userSlice";
 import NotificationBox from "./NotificationBox";
 import target from "../assets/target.png";
 
 export default function SignInEmail() {
   const [email, setEmailInput] = useState("");
-  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const validateEmail = (email) => {
-    return email.trim() !== "" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
 
   const handleSignIn = async () => {
-    if (!validateEmail(email)) {
-      setMessage("Iltimos, to‘g‘ri email manzil kiriting!");
+    if (!email.trim()) {
+      setMessage("Please enter your email!");
       setMessageType("error");
       return;
     }
-    if (password.trim() === "") {
-      setMessage("Iltimos, parol kiriting!");
-      setMessageType("error");
-      return;
-    }
-
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      if (!user.emailVerified) {
-        setMessage("Email tasdiqlanmagan! Iltimos, emailingizni tekshiring.");
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (!methods || methods.length === 0) {
+        setMessage("No such email was found, please register!");
         setMessageType("error");
-        await sendSignInLinkToEmail(auth, email, {
-          url:
-            import.meta.env.VITE_REDIRECT_URL ||
-            "http://localhost:5173/finish-sign-in",
-          handleCodeInApp: true,
-        });
-        window.localStorage.setItem("emailForSignIn", email);
         return;
       }
-
-      dispatch(setName(user.displayName || email.split("@")[0] || "User"));
-      dispatch(setEmail(user.email));
-      setMessage("Muvaffaqiyatli kirdingiz!");
+      setMessage("You have successfully logged in!");
       setMessageType("success");
-      setTimeout(() => navigate("/todo/today"), 2000);
-    } catch (error) {
-      console.error("Sign-in error:", error.code, error.message);
-      if (error.code === "auth/invalid-credential") {
-        setMessage(
-          "Noto‘g‘ri email yoki parol. Iltimos, qaytadan urinib ko‘ring."
-        );
-        setMessageType("error");
-      } else if (error.code === "auth/invalid-email") {
-        setMessage("Noto‘g‘ri email formati!");
-        setMessageType("error");
-      } else if (error.code === "auth/too-many-requests") {
-        setMessage(
-          "Juda ko‘p urinish. Iltimos, keyinroq qayta urinib ko‘ring."
-        );
-        setMessageType("error");
-      } else {
-        setMessage("Kirishda xatolik: " + error.message);
-        setMessageType("error");
-      }
-    }
-  };
-
-  const handlePasswordlessSignIn = async () => {
-    if (!validateEmail(email)) {
-      setMessage("Iltimos, to‘g‘ri email manzil kiriting!");
-      setMessageType("error");
-      return;
-    }
-
-    try {
-      const redirectUrl =
-        import.meta.env.VITE_REDIRECT_URL ||
-        "http://localhost:5173/finish-sign-in";
-      console.log("ActionCodeSettings URL:", redirectUrl);
-      const actionCodeSettings = {
-        url: redirectUrl,
-        handleCodeInApp: true,
-      };
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       window.localStorage.setItem("emailForSignIn", email);
-      window.localStorage.setItem(
-        "nameForSignIn",
-        email.split("@")[0] || "User"
-      );
-      setMessage(
-        "Tasdiqlash havolasi emailingizga yuborildi! Iltimos, emailingizni (shu jumladan Spam jildini) tekshiring."
-      );
-      setMessageType("success");
+      setTimeout(() => navigate("/finish-sign-up"), 1500);
     } catch (error) {
-      console.error("Passwordless sign-in error:", error.code, error.message);
-      if (error.code === "auth/missing-email") {
-        setMessage("Email kiritilmadi! Iltimos, email manzil kiriting.");
-        setMessageType("error");
-      } else if (error.code === "auth/invalid-email") {
-        setMessage("Noto‘g‘ri email formati!");
-        setMessageType("error");
-      } else if (error.code === "auth/too-many-requests") {
-        setMessage(
-          "Juda ko‘p urinish. Iltimos, keyinroq qayta urinib ko‘ring."
-        );
-        setMessageType("error");
-      } else {
-        setMessage("Xatolik: " + error.message);
-        setMessageType("error");
-      }
+      setMessage("Error: " + error.message);
+      setMessageType("error");
     }
   };
 
@@ -152,7 +58,7 @@ export default function SignInEmail() {
       <div className="mt-16 sm:mt-28 border border-gray-300 p-6 sm:p-8 max-w-lg mx-auto">
         <h2 className="text-xl sm:text-2xl font-semibold">Sign In</h2>
         <p className="text-sm mb-4 sm:mb-6 mt-2">
-          Welcome back! Enter your details to sign in.
+          Welcome back! Enter your email to sign in.
         </p>
 
         <div>
@@ -165,24 +71,7 @@ export default function SignInEmail() {
               type="email"
               value={email}
               onChange={(e) => setEmailInput(e.target.value)}
-              placeholder="Email kiriting (masalan, john@gmail.com)"
-              className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="block text-sm font-medium mb-2"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Parol kiriting"
+              placeholder="Enter your email"
               className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -193,12 +82,6 @@ export default function SignInEmail() {
               className="bg-black text-white w-full sm:w-auto px-8 py-2 rounded hover:bg-gray-700"
             >
               Sign In
-            </button>
-            <button
-              onClick={handlePasswordlessSignIn}
-              className="bg-gray-600 text-white w-full sm:w-auto px-8 py-2 rounded hover:bg-gray-700"
-            >
-              Parolsiz kirish (Email havolasi)
             </button>
             <a href="/signup" className="text-blue-600 hover:underline">
               Don’t have an account? Sign up

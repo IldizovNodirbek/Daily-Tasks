@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+ import { MdOutlineCancel } from "react-icons/md";
 
 const NotificationBox = ({ message, type = "info", onClose }) => {
   const [isVisible, setIsVisible] = useState(!!message);
@@ -9,7 +10,7 @@ const NotificationBox = ({ message, type = "info", onClose }) => {
       const timer = setTimeout(() => {
         setIsVisible(false);
         onClose();
-      }, 5000); // 5 soniyadan keyin yashiriladi
+      }, 5000); 
       return () => clearTimeout(timer);
     }
   }, [message, onClose]);
@@ -33,9 +34,9 @@ const NotificationBox = ({ message, type = "info", onClose }) => {
             setIsVisible(false);
             onClose();
           }}
-          className="ml-4 text-sm font-semibold hover:text-gray-900"
+          className="ml-4 text-sm font-semibold"
         >
-          X
+          <MdOutlineCancel className="w-8 h-8" />
         </button>
       </div>
     </div>
