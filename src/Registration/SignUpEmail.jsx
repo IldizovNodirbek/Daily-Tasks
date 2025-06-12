@@ -33,7 +33,7 @@ export default function SignUpEmail() {
         return;
       }
       const redirectUrl =
-        import.meta.env.VITE_SIGNUP_REDIRECT_URL ||
+        import.meta.env.VITE_REDIRECT_URL ||
         "http://localhost:5173/finish-sign-up";
       const actionCodeSettings = {
         url: redirectUrl,
