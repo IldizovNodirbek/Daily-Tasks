@@ -4,7 +4,7 @@ import HomePage from "./Main/HomePage";
 import TodoPage from "./UserProfile/TodoPage";
 import SignInEmail from "./Registration/SignInEmail";
 import SignUpEmail from "./Registration/SignUpEmail";
-import FinishSignUp from "./Registration/FinishSignUp";
+
 
 const App = () => {
   return (
@@ -14,7 +14,6 @@ const App = () => {
         <Route path="/signin" element={<SignInEmail />} />
         <Route path="/signup" element={<SignUpEmail />} />
         <Route path="/todo/*" element={<TodoPage />} />
-        <Route path="/finish-sign-up" element={<FinishSignUp />} />
       </Routes>
     </div>
   );
