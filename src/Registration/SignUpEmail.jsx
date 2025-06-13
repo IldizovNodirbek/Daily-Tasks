@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { auth } from "../firebaseConfig";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import target from "../assets/target.png";
+import { useDispatch } from "react-redux";
+import { setName as setNameRedux, setEmail as setEmailRedux } from "../Redux/userSlice";
 
 export default function SignUpEmail() {
   const [email, setEmail] = useState("");
@@ -10,32 +12,40 @@ export default function SignUpEmail() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSignUp = async (e) => {
-  e.preventDefault(); 
+    e.preventDefault();
 
-  if (!name || !email || !password) {
-    setError("Please fill in all fields!");
-    return;
-  }
-
-  if (password.length < 6) {
-    setError("Password must be at least 6 characters long!");
-    return;
-  }
-
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    navigate("/todo/today");
-  } catch (err) {
-    if (err.code === "auth/email-already-in-use") {
-      setError("This email is already registered!");
-    } else {
-      setError("Error: " + err.message);
+    if (!name || !email || !password) {
+      setError("Please fill in all fields!");
+      return;
     }
-  }
-};
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long!");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      await updateProfile(userCredential.user, {
+        displayName: name,
+      });
+
+      dispatch(setNameRedux(name));
+      dispatch(setEmailRedux(email));
+
+      navigate("/todo/today");
+    } catch (err) {
+      if (err.code === "auth/email-already-in-use") {
+        setError("This email is already registered!");
+      } else {
+        setError("Error: " + err.message);
+      }
+    }
+  };
 
   return (
     <div className="border-gray-700 p-4">

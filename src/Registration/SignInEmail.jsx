@@ -3,21 +3,31 @@ import { auth } from "../firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import target from "../assets/target.png";
+import { useDispatch } from "react-redux";
+import { setName as setNameRedux, setEmail as setEmailRedux } from "../Redux/userSlice";
 
 export default function SignInEmail() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+
     if (!email || !password) {
       setError("Fill in your email and password!");
       return;
     }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      dispatch(setEmailRedux(user.email));
+      dispatch(setNameRedux(user.displayName || "Unknown"));
+
       navigate("/todo/today");
     } catch (err) {
       if (err.code === "auth/user-not-found") {
